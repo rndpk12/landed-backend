@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:landed;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    secret: dGVzdC1vbmx5LXNlY3JldC10aGF0LWlzLWF0LWxlYXN0LTMyLWJ5dGVzLWxvbmc=
+    expiration-ms: 3600000
+  cors:
+    allowed-origins: http://localhost:3000
