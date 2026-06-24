@@ -1,45 +1,77 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search } from 'lucide-react';
+import { Link, Plus, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { ApplicationsTable } from '../components/ApplicationsTable';
 import { EmptyState } from '../components/EmptyState';
+import { JobImportModal } from '../components/JobImportModal';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { applicationApi } from '../services/applicationApi';
 import type { Application, ApplicationStatus } from '../types/application';
+import type { JobImportResponse } from '../types/jobImport';
 
 const statuses: Array<ApplicationStatus | 'All'> = ['All', 'Saved', 'Applied', 'OA', 'Interview', 'Offer', 'Rejected', 'Accepted'];
 const schema = z.object({
   company: z.string().min(1, 'Company is required.'),
   role: z.string().min(1, 'Role is required.'),
   jobUrl: z.string().url('Enter a valid URL.').optional().or(z.literal('')),
+  location: z.string().optional(),
+  employmentType: z.string().optional(),
+  skills: z.string().optional(),
+  jobDescription: z.string().optional(),
   status: z.enum(['Saved', 'Applied', 'OA', 'Interview', 'Offer', 'Rejected', 'Accepted']),
   notes: z.string().optional(),
   appliedDate: z.string().min(1, 'Applied date is required.')
 });
 type FormValues = z.infer<typeof schema>;
 
+const appendImportedContext = (notes?: string, skills?: string) => {
+  const normalizedNotes = notes?.trim() ?? '';
+  const normalizedSkills = skills?.trim() ?? '';
+
+  if (!normalizedSkills) {
+    return normalizedNotes || undefined;
+  }
+
+  const skillsLine = 'Skills: ' + normalizedSkills;
+  return normalizedNotes ? normalizedNotes + '\n\n' + skillsLine : skillsLine;
+};
+
+const toApplicationPayload = (values: FormValues) => ({
+  ...values,
+  jobUrl: values.jobUrl || undefined,
+  location: values.location || undefined,
+  employmentType: values.employmentType || undefined,
+  jobDescription: values.jobDescription || undefined,
+  notes: appendImportedContext(values.notes, values.skills)
+});
+
 export const ApplicationsPage = () => {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<ApplicationStatus | 'All'>('All');
   const [modalOpen, setModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [editingApplication, setEditingApplication] = useState<Application | null>(null);
   const queryClient = useQueryClient();
   const applicationsQuery = useQuery({ queryKey: ['applications'], queryFn: applicationApi.list });
   const createMutation = useMutation({ mutationFn: applicationApi.create, onSuccess: () => queryClient.invalidateQueries({ queryKey: ['applications'] }) });
-  const updateMutation = useMutation({ mutationFn: ({ id, values }: { id: string; values: FormValues }) => applicationApi.update(id, { ...values, jobUrl: values.jobUrl || undefined }), onSuccess: () => queryClient.invalidateQueries({ queryKey: ['applications'] }) });
+  const updateMutation = useMutation({ mutationFn: ({ id, values }: { id: string; values: FormValues }) => applicationApi.update(id, toApplicationPayload(values)), onSuccess: () => queryClient.invalidateQueries({ queryKey: ['applications'] }) });
   const deleteMutation = useMutation({ mutationFn: applicationApi.remove, onSuccess: () => queryClient.invalidateQueries({ queryKey: ['applications'] }) });
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { company: '', role: '', jobUrl: '', status: 'Applied', notes: '', appliedDate: new Date().toISOString().slice(0, 10) }
+    defaultValues: { company: '', role: '', jobUrl: '', location: '', employmentType: '', skills: '', jobDescription: '', status: 'Applied', notes: '', appliedDate: new Date().toISOString().slice(0, 10) }
   });
 
   const emptyFormValues = useMemo<FormValues>(() => ({
     company: '',
     role: '',
     jobUrl: '',
+    location: '',
+    employmentType: '',
+    skills: '',
+    jobDescription: '',
     status: 'Applied',
     notes: '',
     appliedDate: new Date().toISOString().slice(0, 10)
@@ -73,6 +105,10 @@ export const ApplicationsPage = () => {
       company: application.company,
       role: application.role,
       jobUrl: application.jobUrl ?? '',
+      location: application.location ?? '',
+      employmentType: application.employmentType ?? '',
+      skills: '',
+      jobDescription: application.jobDescription ?? '',
       status: application.status,
       notes: application.notes ?? '',
       appliedDate: application.appliedDate || new Date().toISOString().slice(0, 10)
@@ -86,11 +122,30 @@ export const ApplicationsPage = () => {
     reset(emptyFormValues);
   };
 
+  const onImported = (url: string, job: JobImportResponse) => {
+    setEditingApplication(null);
+    createMutation.reset();
+    updateMutation.reset();
+    reset({
+      ...emptyFormValues,
+      company: job.company,
+      role: job.role,
+      jobUrl: url,
+      location: job.location,
+      employmentType: job.employmentType,
+      skills: job.skills.join(', '),
+      jobDescription: job.description,
+      notes: [job.experience ? 'Experience: ' + job.experience : '', job.salary ? 'Salary: ' + job.salary : ''].filter(Boolean).join('\n')
+    });
+    setImportModalOpen(false);
+    setModalOpen(true);
+  };
+
   const onSubmit = async (values: FormValues) => {
     if (editingApplication) {
       await updateMutation.mutateAsync({ id: editingApplication.id, values });
     } else {
-      await createMutation.mutateAsync({ ...values, jobUrl: values.jobUrl || undefined });
+      await createMutation.mutateAsync(toApplicationPayload(values));
     }
 
     reset(emptyFormValues);
@@ -126,10 +181,16 @@ export const ApplicationsPage = () => {
           <h2 className="text-2xl font-bold tracking-tight text-slate-950">Applications</h2>
           <p className="mt-1 text-sm text-slate-500">Search, filter, and manage every active opportunity.</p>
         </div>
-        <button className="btn-primary" type="button" onClick={openCreateModal}>
-          <Plus className="h-4 w-4" />
-          Add Application
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button className="btn-secondary" type="button" onClick={() => setImportModalOpen(true)}>
+            <Link className="h-4 w-4" />
+            Import from Job URL
+          </button>
+          <button className="btn-primary" type="button" onClick={openCreateModal}>
+            <Plus className="h-4 w-4" />
+            Add Application
+          </button>
+        </div>
       </div>
       {mutationError ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -171,8 +232,12 @@ export const ApplicationsPage = () => {
               <div><label className="text-sm font-semibold text-slate-700">Company</label><input className="input mt-2" {...register('company')} />{errors.company ? <p className="mt-1 text-xs text-rose-600">{errors.company.message}</p> : null}</div>
               <div><label className="text-sm font-semibold text-slate-700">Role</label><input className="input mt-2" {...register('role')} />{errors.role ? <p className="mt-1 text-xs text-rose-600">{errors.role.message}</p> : null}</div>
               <div><label className="text-sm font-semibold text-slate-700">Job URL</label><input className="input mt-2" {...register('jobUrl')} />{errors.jobUrl ? <p className="mt-1 text-xs text-rose-600">{errors.jobUrl.message}</p> : null}</div>
+              <div><label className="text-sm font-semibold text-slate-700">Location</label><input className="input mt-2" {...register('location')} /></div>
+              <div><label className="text-sm font-semibold text-slate-700">Employment Type</label><input className="input mt-2" {...register('employmentType')} /></div>
               <div><label className="text-sm font-semibold text-slate-700">Status</label><select className="input mt-2" {...register('status')}>{statuses.filter((item) => item !== 'All').map((item) => <option key={item}>{item}</option>)}</select></div>
               <div><label className="text-sm font-semibold text-slate-700">Applied Date</label><input className="input mt-2" type="date" {...register('appliedDate')} />{errors.appliedDate ? <p className="mt-1 text-xs text-rose-600">{errors.appliedDate.message}</p> : null}</div>
+              <div className="sm:col-span-2"><label className="text-sm font-semibold text-slate-700">Skills</label><input className="input mt-2" placeholder="React, TypeScript, SQL" {...register('skills')} /></div>
+              <div className="sm:col-span-2"><label className="text-sm font-semibold text-slate-700">Description</label><textarea className="input mt-2 min-h-36" {...register('jobDescription')} /></div>
               <div className="sm:col-span-2"><label className="text-sm font-semibold text-slate-700">Notes</label><textarea className="input mt-2 min-h-28" {...register('notes')} /></div>
             </div>
             <div className="mt-6 flex justify-end gap-3">
@@ -182,6 +247,7 @@ export const ApplicationsPage = () => {
           </form>
         </div>
       ) : null}
+      {importModalOpen ? <JobImportModal onClose={() => setImportModalOpen(false)} onImported={onImported} /> : null}
     </div>
   );
 };

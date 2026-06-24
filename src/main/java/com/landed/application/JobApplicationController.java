@@ -2,6 +2,8 @@ package com.landed.application;
 
 import com.landed.application.dto.ApplicationRequest;
 import com.landed.application.dto.ApplicationResponse;
+import com.landed.application.dto.StageNoteRequest;
+import com.landed.application.dto.StageNoteResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -49,6 +51,14 @@ public class JobApplicationController {
     public ApplicationResponse update(Authentication authentication, @PathVariable UUID id,
                                       @Valid @RequestBody ApplicationRequest request) {
         return applicationService.update(authentication.getName(), id, request);
+    }
+
+    @PostMapping("/{id}/notes")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Add an interview note to an application owned by the current user")
+    public StageNoteResponse addNote(Authentication authentication, @PathVariable UUID id,
+                                     @Valid @RequestBody StageNoteRequest request) {
+        return applicationService.addStageNote(authentication.getName(), id, request);
     }
 
     @DeleteMapping("/{id}")

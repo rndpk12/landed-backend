@@ -1,0 +1,19 @@
+export type ActivityType =
+  | 'APPLICATION_CREATED'
+  | 'APPLICATION_STATUS_CHANGED'
+  | 'RESUME_UPLOADED'
+  | 'RESUME_VERSION_CREATED'
+  | 'RESUME_MATCH_RUN'
+  | 'INTERVIEW_NOTE_ADDED'
+  | 'INTERVIEW_NOTE_CREATED'
+  | 'INTERVIEW_NOTE_UPDATED'
+  | 'INTERVIEW_NOTE_DELETED';
+
+export interface Activity {
+  id: string;
+  type: ActivityType;
+  title: string;
+  description: string;
+  entityId?: string | null;
+  occurredAt: string;
+}

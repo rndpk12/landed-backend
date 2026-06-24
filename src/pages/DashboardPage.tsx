@@ -5,8 +5,8 @@ import { ApplicationsTable } from '../components/ApplicationsTable';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ResumePerformanceCard } from '../components/ResumePerformanceCard';
 import { StatCard } from '../components/StatCard';
+import { useActivitiesQuery } from '../hooks/useActivitiesQuery';
 import { useAuth } from '../hooks/useAuth';
-import { activityItems } from '../lib/mockData';
 import { applicationApi } from '../services/applicationApi';
 import { resumeApi } from '../services/resumeApi';
 
@@ -14,6 +14,7 @@ export const DashboardPage = () => {
   const { user } = useAuth();
   const applicationsQuery = useQuery({ queryKey: ['applications'], queryFn: applicationApi.list });
   const resumesQuery = useQuery({ queryKey: ['resumes'], queryFn: resumeApi.list });
+  const activitiesQuery = useActivitiesQuery();
 
   if (applicationsQuery.isLoading || resumesQuery.isLoading) {
     return <LoadingSpinner />;
@@ -47,7 +48,15 @@ export const DashboardPage = () => {
           </div>
           <ApplicationsTable applications={applications.slice(0, 5)} compact />
         </div>
-        <ActivityTimeline items={activityItems} />
+        <ActivityTimeline
+          activities={(activitiesQuery.data ?? []).slice(0, 20)}
+          error={activitiesQuery.error}
+          isError={activitiesQuery.isError}
+          isLoading={activitiesQuery.isLoading}
+          onRetry={() => {
+            void activitiesQuery.refetch();
+          }}
+        />
       </section>
       <ResumePerformanceCard resumes={resumesQuery.data ?? []} />
     </div>

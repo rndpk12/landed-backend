@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -45,5 +45,57 @@ select {
 
   .page-shell {
     @apply mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mq-rtl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes cloudDrift {
+  0%,
+  100% {
+    transform: translate(-50%, -58%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -58%) translateY(-8px);
+  }
+}
+
+@keyframes chipFloat {
+  0%,
+  100% {
+    transform: translate(-30%, -54%) translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translate(-30%, -54%) translateY(-6px) rotate(1deg);
+  }
+}
+
+@keyframes ldPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.5);
   }
 }

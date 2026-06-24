@@ -1,11 +1,12 @@
 import { Link, NavLink } from 'react-router-dom';
-import { BarChart3, BriefcaseBusiness, FileText, Home, LogOut, NotebookTabs, Settings } from 'lucide-react';
+import { BarChart3, BriefcaseBusiness, FileSearch, FileText, Home, LogOut, NotebookTabs, Settings } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: Home },
   { label: 'Applications', path: '/applications', icon: BriefcaseBusiness },
   { label: 'Resume Vault', path: '/resumes', icon: FileText },
+  { label: 'Resume Match', path: '/resume-match', icon: FileSearch },
   { label: 'Interview Notes', path: '/interview-notes', icon: NotebookTabs },
   { label: 'Analytics', path: '/analytics', icon: BarChart3 },
   { label: 'Settings', path: '/settings', icon: Settings }

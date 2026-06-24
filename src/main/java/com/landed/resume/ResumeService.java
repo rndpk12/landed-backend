@@ -1,5 +1,7 @@
 package com.landed.resume;
 
+import com.landed.activity.ActivityService;
+import com.landed.activity.ActivityType;
 import com.landed.application.JobApplicationRepository;
 import com.landed.common.exception.ResourceNotFoundException;
 import com.landed.resume.ResumeStorageService.StoredFile;
@@ -33,11 +35,12 @@ public class ResumeService {
     private final ResumeStorageService storageService;
     private final ResumeTextExtractor textExtractor;
     private final ResumeDiffService diffService;
+    private final ActivityService activityService;
 
     public ResumeService(ResumeRepository resumeRepository, ResumeVersionRepository versionRepository,
                          JobApplicationRepository applicationRepository, UserRepository userRepository,
                          ResumeStorageService storageService, ResumeTextExtractor textExtractor,
-                         ResumeDiffService diffService) {
+                         ResumeDiffService diffService, ActivityService activityService) {
         this.resumeRepository = resumeRepository;
         this.versionRepository = versionRepository;
         this.applicationRepository = applicationRepository;
@@ -45,6 +48,7 @@ public class ResumeService {
         this.storageService = storageService;
         this.textExtractor = textExtractor;
         this.diffService = diffService;
+        this.activityService = activityService;
     }
 
     @Transactional
@@ -53,6 +57,8 @@ public class ResumeService {
         Resume resume = resumeRepository.save(new Resume(user, metadata.name().trim(), normalizeTags(metadata.tags())));
         ResumeVersion version = storeVersion(resume, 1, file);
         resume.addVersion(version);
+        activityService.record(user, ActivityType.RESUME_UPLOADED, "Resume uploaded",
+                resume.getName() + " v" + version.getVersionNumber(), resume.getId());
         return response(resume);
     }
 
@@ -86,6 +92,8 @@ public class ResumeService {
                 .orElse(1);
         ResumeVersion version = storeVersion(resume, nextVersion, file);
         resume.touch();
+        activityService.record(user, ActivityType.RESUME_VERSION_CREATED, "Resume version created",
+                resume.getName() + " v" + version.getVersionNumber(), resume.getId());
         return ResumeVersionResponse.from(version);
     }
 
