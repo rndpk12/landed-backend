@@ -51,7 +51,7 @@ export const LandingNav = () => {
         <button
           className="inline-flex items-center gap-2 rounded-full bg-[#0a0a0a] px-[18px] py-2 text-[13px] font-semibold tracking-[-0.01em] text-white no-underline transition hover:-translate-y-px hover:opacity-85"
           type="button"
-          onClick={() => navigate('/register')}
+          onClick={() => navigate('/login?mode=register')}
         >
           Get Started
         </button>

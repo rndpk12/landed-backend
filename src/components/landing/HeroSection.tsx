@@ -29,7 +29,7 @@ export const HeroSection = () => {
         <button
           className="inline-flex items-center gap-2.5 rounded-xl bg-[#0a0a0a] px-6 py-[13px] text-sm font-semibold tracking-[-0.02em] text-white transition hover:-translate-y-0.5 hover:bg-[#1a1a1a] hover:shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
           type="button"
-          onClick={() => navigate('/register')}
+          onClick={() => navigate('/login?mode=register')}
         >
           Get Started
           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f97316] text-[9px]">

@@ -9,7 +9,6 @@ import { InterviewNotesPage } from '../pages/InterviewNotesPage';
 import { LandingPage } from '../pages/LandingPage';
 import { LoginPage } from '../pages/LoginPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
-import { RegisterPage } from '../pages/RegisterPage';
 import { ResumeMatchPage } from '../pages/ResumeMatchPage';
 import { ResumeVaultPage } from '../pages/ResumeVaultPage';
 import { SettingsPage } from '../pages/SettingsPage';
@@ -17,7 +16,6 @@ import { SettingsPage } from '../pages/SettingsPage';
 const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
   { path: '/login', element: <LoginPage /> },
-  { path: '/register', element: <RegisterPage /> },
   {
     element: <ProtectedRoute />,
     children: [

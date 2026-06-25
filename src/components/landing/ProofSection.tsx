@@ -45,7 +45,7 @@ export const CtaSection = () => {
             <button
               className="inline-flex items-center gap-2.5 rounded-full bg-white px-7 py-3.5 text-[15px] font-semibold tracking-[-0.02em] text-[#0a0a0a] transition hover:-translate-y-0.5 hover:bg-[#f0f0f0] hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
               type="button"
-              onClick={() => navigate('/register')}
+              onClick={() => navigate('/login?mode=register')}
             >
               Early Access
               <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-[#f97316] text-[10px] transition group-hover:rotate-45">
