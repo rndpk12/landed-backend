@@ -101,10 +101,10 @@ export const LoginPage = () => {
   const isRegister = mode === 'register';
 
   return (
-    <main className="h-screen overflow-hidden bg-[#2c82b8] p-1 font-sans text-white">
-      <section className="grid h-full w-full gap-2 overflow-hidden bg-[#2c82b8] lg:grid-cols-[0.98fr_1fr]">
+    <main className="h-screen overflow-hidden bg-[#010b19] p-1 font-sans text-white">
+      <section className="grid h-full w-full gap-2 overflow-hidden bg-[#010b19] lg:grid-cols-[0.98fr_1fr]">
         <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[3px] bg-white text-slate-950">
-          <div className="flex h-[clamp(58px,8vh,72px)] shrink-0 items-center justify-between border-b-[10px] border-[#2c82b8] px-6 sm:px-8">
+          <div className="flex h-[clamp(58px,8vh,72px)] shrink-0 items-center justify-between border-b-[10px] border-[#010b19] px-6 sm:px-8">
             <button
               type="button"
               onClick={() => navigate('/')}
@@ -112,12 +112,6 @@ export const LoginPage = () => {
             >
               landed.
             </button>
-            <div className="grid h-11 w-11 grid-cols-2 gap-1" aria-hidden="true">
-              <span className="bg-slate-950" />
-              <span className="bg-slate-950" />
-              <span className="bg-slate-950" />
-              <span className="bg-slate-950" />
-            </div>
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 py-[clamp(18px,3vh,34px)] text-center sm:px-10">
@@ -128,7 +122,7 @@ export const LoginPage = () => {
             </div>
 
             <div className="w-full max-w-[430px]">
-              <p className="mb-[clamp(6px,1vh,12px)] font-mono text-xs font-bold uppercase text-[#2c82b8]">
+              <p className="mb-[clamp(6px,1vh,12px)] font-mono text-xs font-bold uppercase text-[#010b19]">
                 {isRegister ? 'Start free' : 'Welcome back'}
               </p>
               <h1 className="whitespace-nowrap text-[clamp(22px,3vw,42px)] font-black uppercase leading-none text-slate-950">
@@ -221,7 +215,7 @@ export const LoginPage = () => {
                 <button
                   type="button"
                   onClick={() => switchMode(isRegister ? 'login' : 'register')}
-                  className="border-b-2 border-[#2c82b8] bg-transparent pb-0.5 font-black text-slate-950 focus:outline-none"
+                  className="border-b-2 border-[#010b19] bg-transparent pb-0.5 font-black text-slate-950 focus:outline-none"
                 >
                   {isRegister ? 'Sign in' : 'Create account'}
                 </button>
@@ -241,7 +235,7 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        <div className="relative hidden h-full min-h-0 overflow-hidden bg-[#1480bf] lg:block">
+        <div className="relative hidden h-full min-h-0 overflow-hidden bg-[#010b19] lg:block">
           <nav className="relative z-20 grid h-[clamp(58px,8vh,72px)] grid-cols-[1fr_auto] items-stretch bg-white/10 text-sm font-bold text-white">
             <div className="grid grid-cols-5">
               {['Roles', 'Resumes', 'Stages', 'Notes', 'Analytics'].map((item) => (
@@ -259,8 +253,8 @@ export const LoginPage = () => {
             </button>
           </nav>
 
-          <div className="absolute inset-0 bg-[linear-gradient(160deg,#1685bf_0%,#2a9fd0_45%,#48afd9_100%)]" />
-          <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:44px_44px]" />
+          <div className="absolute inset-0 bg-[linear-gradient(160deg,#010b19_0%,#07111f_45%,#111827_100%)]" />
+          <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:44px_44px]" />
 
           <div className="absolute bottom-8 left-8 z-20 w-[275px] bg-white/22 p-7 text-white backdrop-blur-sm">
             <div className="mb-24 grid w-16 grid-cols-3 gap-2" aria-hidden="true">
