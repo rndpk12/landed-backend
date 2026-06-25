@@ -31,7 +31,7 @@ type FieldProps = {
   compact?: boolean;
 };
 
-const partners = ['Google', 'Adobe', 'Intel', 'Amazon', 'Sony'];
+const partners = ['LinkedIn ', 'Indeed', 'Workday', 'Greenhouse', 'Instahyre'];
 
 const AuthField = ({ label, type, placeholder, autoComplete, error, registration, compact }: FieldProps) => (
   <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-[clamp(4px,0.7vh,8px)]'}`}>
@@ -131,24 +131,8 @@ export const LoginPage = () => {
               <p className="mb-[clamp(6px,1vh,12px)] font-mono text-xs font-bold uppercase text-[#2c82b8]">
                 {isRegister ? 'Start free' : 'Welcome back'}
               </p>
-              <h1 className="text-[clamp(38px,7vh,56px)] font-black uppercase leading-[1.04] text-slate-950">
-                {isRegister ? (
-                  <>
-                    Create
-                    <span className="block font-serif text-[0.86em] italic normal-case leading-[0.9]">
-                      your
-                    </span>
-                    Account
-                  </>
-                ) : (
-                  <>
-                    Sign in
-                    <span className="block font-serif text-[0.86em] italic normal-case leading-[0.9]">
-                      to
-                    </span>
-                    Landed
-                  </>
-                )}
+              <h1 className="whitespace-nowrap text-[clamp(22px,3vw,42px)] font-black uppercase leading-none text-slate-950">
+                {isRegister ? 'Create your account' : 'Sign in to Landed'}
               </h1>
 
               <p className="mx-auto mt-[clamp(12px,2.1vh,24px)] max-w-[330px] text-sm font-medium leading-5 text-slate-700">
@@ -247,7 +231,7 @@ export const LoginPage = () => {
 
           <div className="shrink-0 border-t border-slate-200 px-6 py-[clamp(14px,2.2vh,24px)] text-center sm:px-8">
             <p className="font-mono text-[11px] font-bold uppercase text-slate-700">
-              Trusted by ambitious job seekers globally
+              Works on top job platforms like
             </p>
             <div className="mt-[clamp(10px,1.8vh,20px)] flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-lg font-black text-slate-300 sm:text-xl">
               {partners.map((partner) => (
@@ -275,7 +259,7 @@ export const LoginPage = () => {
             </button>
           </nav>
 
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_45%_28%,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.48)_14%,rgba(89,182,220,0.3)_28%,rgba(20,128,191,0)_48%),radial-gradient(circle_at_20%_58%,rgba(255,255,255,0.42)_0%,rgba(255,255,255,0)_23%),linear-gradient(160deg,#1984bf_0%,#2f9bd0_38%,#53b4dc_64%,#1f78af_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(160deg,#1685bf_0%,#2a9fd0_45%,#48afd9_100%)]" />
           <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px)] [background-size:44px_44px]" />
 
           <div className="absolute bottom-8 left-8 z-20 w-[275px] bg-white/22 p-7 text-white backdrop-blur-sm">
