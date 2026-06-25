@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, Plus, Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { ApplicationsTable } from '../components/ApplicationsTable';
 import { EmptyState } from '../components/EmptyState';
@@ -49,6 +50,7 @@ const toApplicationPayload = (values: FormValues) => ({
 });
 
 export const ApplicationsPage = () => {
+  const [searchParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<ApplicationStatus | 'All'>('All');
   const [modalOpen, setModalOpen] = useState(false);
@@ -63,6 +65,10 @@ export const ApplicationsPage = () => {
     resolver: zodResolver(schema),
     defaultValues: { company: '', role: '', jobUrl: '', location: '', employmentType: '', skills: '', jobDescription: '', status: 'Applied', notes: '', appliedDate: new Date().toISOString().slice(0, 10) }
   });
+
+  useEffect(() => {
+    setQuery(searchParams.get('search') ?? '');
+  }, [searchParams]);
 
   const emptyFormValues = useMemo<FormValues>(() => ({
     company: '',
@@ -218,31 +224,31 @@ export const ApplicationsPage = () => {
         <EmptyState icon={Search} title="No applications found" description="Try a different search or add a new application to the pipeline." />
       )}
       {modalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4 py-8 backdrop-blur-sm">
-          <form className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-xl" onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-5 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 px-4 py-4 backdrop-blur-sm">
+          <form className="max-h-[88vh] w-full max-w-[560px] overflow-y-auto rounded-2xl bg-white p-3.5 shadow-xl" onSubmit={handleSubmit(onSubmit)}>
+            <div className="mb-2.5 flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-xl font-bold text-slate-950">{editingApplication ? 'Edit Application' : 'Add Application'}</h3>
-                <p className="text-sm text-slate-500">Capture the basics and keep moving.</p>
+                <h3 className="text-base font-bold text-slate-950">{editingApplication ? 'Edit Application' : 'Add Application'}</h3>
+                <p className="text-[11px] text-slate-500">Capture the basics and keep moving.</p>
               </div>
-              <button className="btn-secondary" type="button" onClick={closeModal}>Close</button>
+              <button className="btn-secondary px-2.5 py-1.5 text-xs" type="button" onClick={closeModal}>Close</button>
             </div>
-            {mutationError ? <p className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{mutationError.message}</p> : null}
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div><label className="text-sm font-semibold text-slate-700">Company</label><input className="input mt-2" {...register('company')} />{errors.company ? <p className="mt-1 text-xs text-rose-600">{errors.company.message}</p> : null}</div>
-              <div><label className="text-sm font-semibold text-slate-700">Role</label><input className="input mt-2" {...register('role')} />{errors.role ? <p className="mt-1 text-xs text-rose-600">{errors.role.message}</p> : null}</div>
-              <div><label className="text-sm font-semibold text-slate-700">Job URL</label><input className="input mt-2" {...register('jobUrl')} />{errors.jobUrl ? <p className="mt-1 text-xs text-rose-600">{errors.jobUrl.message}</p> : null}</div>
-              <div><label className="text-sm font-semibold text-slate-700">Location</label><input className="input mt-2" {...register('location')} /></div>
-              <div><label className="text-sm font-semibold text-slate-700">Employment Type</label><input className="input mt-2" {...register('employmentType')} /></div>
-              <div><label className="text-sm font-semibold text-slate-700">Status</label><select className="input mt-2" {...register('status')}>{statuses.filter((item) => item !== 'All').map((item) => <option key={item}>{item}</option>)}</select></div>
-              <div><label className="text-sm font-semibold text-slate-700">Applied Date</label><input className="input mt-2" type="date" {...register('appliedDate')} />{errors.appliedDate ? <p className="mt-1 text-xs text-rose-600">{errors.appliedDate.message}</p> : null}</div>
-              <div className="sm:col-span-2"><label className="text-sm font-semibold text-slate-700">Skills</label><input className="input mt-2" placeholder="React, TypeScript, SQL" {...register('skills')} /></div>
-              <div className="sm:col-span-2"><label className="text-sm font-semibold text-slate-700">Description</label><textarea className="input mt-2 min-h-36" {...register('jobDescription')} /></div>
-              <div className="sm:col-span-2"><label className="text-sm font-semibold text-slate-700">Notes</label><textarea className="input mt-2 min-h-28" {...register('notes')} /></div>
+            {mutationError ? <p className="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{mutationError.message}</p> : null}
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              <div><label className="text-[11px] font-semibold text-slate-700">Company</label><input className="input mt-1 h-8 py-1.5 text-xs" {...register('company')} />{errors.company ? <p className="mt-1 text-xs text-rose-600">{errors.company.message}</p> : null}</div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Role</label><input className="input mt-1 h-8 py-1.5 text-xs" {...register('role')} />{errors.role ? <p className="mt-1 text-xs text-rose-600">{errors.role.message}</p> : null}</div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Job URL</label><input className="input mt-1 h-8 py-1.5 text-xs" {...register('jobUrl')} />{errors.jobUrl ? <p className="mt-1 text-xs text-rose-600">{errors.jobUrl.message}</p> : null}</div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Location</label><input className="input mt-1 h-8 py-1.5 text-xs" {...register('location')} /></div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Employment Type</label><input className="input mt-1 h-8 py-1.5 text-xs" {...register('employmentType')} /></div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Status</label><select className="input mt-1 h-8 py-1.5 text-xs" {...register('status')}>{statuses.filter((item) => item !== 'All').map((item) => <option key={item}>{item}</option>)}</select></div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Applied Date</label><input className="input mt-1 h-8 py-1.5 text-xs" type="date" {...register('appliedDate')} />{errors.appliedDate ? <p className="mt-1 text-xs text-rose-600">{errors.appliedDate.message}</p> : null}</div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Skills</label><input className="input mt-1 h-8 py-1.5 text-xs" placeholder="React, TypeScript, SQL" {...register('skills')} /></div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Description</label><textarea className="input mt-1 min-h-20 py-1.5 text-xs" {...register('jobDescription')} /></div>
+              <div><label className="text-[11px] font-semibold text-slate-700">Notes</label><textarea className="input mt-1 min-h-20 py-1.5 text-xs" {...register('notes')} /></div>
             </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <button className="btn-secondary" type="button" onClick={closeModal}>Cancel</button>
-              <button className="btn-primary" type="submit" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Application'}</button>
+            <div className="mt-3 flex justify-end gap-2.5">
+              <button className="btn-secondary px-2.5 py-1.5 text-xs" type="button" onClick={closeModal}>Cancel</button>
+              <button className="btn-primary px-2.5 py-1.5 text-xs" type="submit" disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Application'}</button>
             </div>
           </form>
         </div>

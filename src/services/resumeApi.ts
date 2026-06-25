@@ -1,4 +1,5 @@
 import { apiClient } from '../lib/apiClient';
+import { localDataStore, shouldUseLocalDataFallback } from '../lib/localDataStore';
 import type { Resume, ResumeUploadPayload, ResumeVersion, ResumeVersionUploadPayload } from '../types/resume';
 
 interface BackendResumeVersionResponse {
@@ -67,48 +68,97 @@ const metadataBlob = (payload: ResumeUploadPayload) => {
 
 export const resumeApi = {
   async list(): Promise<Resume[]> {
-    const response = await apiClient.get<BackendResumeResponse[]>('/resumes');
-    return response.data.map(mapResume);
+    try {
+      const response = await apiClient.get<BackendResumeResponse[]>('/resumes');
+      return response.data.map(mapResume);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.listResumes();
+      }
+
+      throw error;
+    }
   },
   async get(id: string): Promise<Resume> {
-    const response = await apiClient.get<BackendResumeResponse>('/resumes/' + id);
-    return mapResume(response.data);
+    try {
+      const response = await apiClient.get<BackendResumeResponse>('/resumes/' + id);
+      return mapResume(response.data);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.getResume(id);
+      }
+
+      throw error;
+    }
   },
   async upload(payload: ResumeUploadPayload): Promise<Resume> {
     const formData = new FormData();
     formData.append('metadata', metadataBlob(payload));
     formData.append('file', payload.file[0]);
 
-    const response = await apiClient.post<BackendResumeResponse>('/resumes', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    try {
+      const response = await apiClient.post<BackendResumeResponse>('/resumes', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-    return mapResume(response.data);
+      return mapResume(response.data);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.uploadResume(payload);
+      }
+
+      throw error;
+    }
   },
   async uploadVersion(payload: ResumeVersionUploadPayload): Promise<ResumeVersion> {
     const formData = new FormData();
     formData.append('file', payload.file);
 
-    const response = await apiClient.post<BackendResumeVersionResponse>('/resumes/' + payload.resumeId + '/versions', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    try {
+      const response = await apiClient.post<BackendResumeVersionResponse>('/resumes/' + payload.resumeId + '/versions', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-    return mapVersion(response.data);
+      return mapVersion(response.data);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.uploadResumeVersion(payload.resumeId, payload.file);
+      }
+
+      throw error;
+    }
   },
   async downloadVersion(versionId: string): Promise<void> {
-    const response = await apiClient.get<Blob>('/resumes/versions/' + versionId + '/download', { responseType: 'blob' });
-    const disposition = response.headers['content-disposition'];
-    const filename = /filename\*?=(?:UTF-8''|")?([^";]+)/i.exec(disposition ?? '')?.[1] ?? 'resume.pdf';
-    const url = URL.createObjectURL(response.data);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = decodeURIComponent(filename.replace(/"/g, ''));
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    URL.revokeObjectURL(url);
+    try {
+      const response = await apiClient.get<Blob>('/resumes/versions/' + versionId + '/download', { responseType: 'blob' });
+      const disposition = response.headers['content-disposition'];
+      const filename = /filename\*?=(?:UTF-8''|")?([^";]+)/i.exec(disposition ?? '')?.[1] ?? 'resume.pdf';
+      const url = URL.createObjectURL(response.data);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = decodeURIComponent(filename.replace(/"/g, ''));
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        throw new Error('Local resume records keep metadata only, so there is no PDF file to download.');
+      }
+
+      throw error;
+    }
   },
   async remove(id: string): Promise<void> {
-    await apiClient.delete('/resumes/' + id);
+    try {
+      await apiClient.delete('/resumes/' + id);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        localDataStore.removeResume(id);
+        return;
+      }
+
+      throw error;
+    }
   }
 };

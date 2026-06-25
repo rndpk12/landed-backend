@@ -31,25 +31,30 @@ type FieldProps = {
   compact?: boolean;
 };
 
-const partners = ['LinkedIn ', 'Indeed', 'Workday', 'Greenhouse', 'Instahyre'];
+const partners = ['LinkedIn', 'Indeed', 'Workday', 'Greenhouse', 'Instahyre', 'Lever', 'Ashby', 'Naukri'];
 
-const AuthField = ({ label, type, placeholder, autoComplete, error, registration, compact }: FieldProps) => (
-  <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-[clamp(4px,0.7vh,8px)]'}`}>
-    <label className={`${compact ? 'text-[10px]' : 'text-[11px]'} font-black uppercase text-slate-950`}>
-      {label}
-    </label>
-    <input
-      className={`${compact ? 'h-[38px] px-3 text-xs' : 'h-[clamp(42px,5.8vh,48px)] px-4 text-sm'} w-full rounded-none border-2 bg-white font-semibold text-slate-950 outline-none transition placeholder:text-slate-300 focus:border-slate-950 ${
-        error ? 'border-rose-500' : 'border-slate-950/15'
-      }`}
-      type={type}
-      placeholder={placeholder}
-      autoComplete={autoComplete}
-      {...registration}
-    />
-    {error ? <p className={`${compact ? 'text-[10px]' : 'text-xs'} font-medium text-rose-600`}>{error.message}</p> : null}
-  </div>
-);
+const AuthField = ({ label, type, placeholder, autoComplete, error, registration, compact }: FieldProps) => {
+  const inputId = 'auth-' + registration.name;
+
+  return (
+    <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-[clamp(4px,0.7vh,8px)]'}`}>
+      <label className={`${compact ? 'text-[10px]' : 'text-[11px]'} font-black uppercase text-slate-950`} htmlFor={inputId}>
+        {label}
+      </label>
+      <input
+        id={inputId}
+        className={`${compact ? 'h-[38px] px-3 text-xs' : 'h-[clamp(42px,5.8vh,48px)] px-4 text-sm'} w-full rounded-none border-2 bg-white font-semibold text-slate-950 outline-none transition placeholder:text-slate-300 focus:border-slate-950 ${
+          error ? 'border-rose-500' : 'border-slate-950/15'
+        }`}
+        type={type}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        {...registration}
+      />
+      {error ? <p className={`${compact ? 'text-[10px]' : 'text-xs'} font-medium text-rose-600`}>{error.message}</p> : null}
+    </div>
+  );
+};
 
 export const LoginPage = () => {
   const { login, register: createAccount, isAuthenticated, loading } = useAuth();
@@ -62,6 +67,7 @@ export const LoginPage = () => {
   const [mode, setMode] = useState<AuthMode>(
     searchParams.get('mode') === 'register' ? 'register' : 'login'
   );
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -82,18 +88,29 @@ export const LoginPage = () => {
   }
 
   const onLoginSubmit = async (values: LoginValues) => {
-    await login(values);
-    navigate(from, { replace: true });
+    setAuthError(null);
+    try {
+      await login(values);
+      navigate(from, { replace: true });
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : 'Could not sign in. Please try again.');
+    }
   };
 
   const onRegisterSubmit = async (values: RegisterValues) => {
-    await createAccount(values);
-    navigate('/dashboard', { replace: true });
+    setAuthError(null);
+    try {
+      await createAccount(values);
+      navigate('/dashboard', { replace: true });
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : 'Could not create your account. Please try again.');
+    }
   };
 
   const switchMode = (next: AuthMode) => {
     setMode(next);
     setSearchParams(next === 'register' ? { mode: 'register' } : {});
+    setAuthError(null);
     loginForm.clearErrors();
     registerForm.clearErrors();
   };
@@ -114,26 +131,32 @@ export const LoginPage = () => {
             </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 py-[clamp(18px,3vh,34px)] text-center sm:px-10">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 py-[clamp(18px,3vh,34px)] text-center sm:px-10 lg:items-start lg:pl-[18%] lg:pr-10">
             <div className="mb-[clamp(14px,2.5vh,28px)] flex gap-2" aria-hidden="true">
               <span className="h-3 w-3 bg-slate-950" />
               <span className="h-3 w-3 bg-slate-950" />
               <span className="h-3 w-3 bg-slate-950" />
             </div>
 
-            <div className="w-full max-w-[430px]">
+            <div className="w-full max-w-[430px] lg:max-w-[410px]">
               <p className="mb-[clamp(6px,1vh,12px)] font-mono text-xs font-bold uppercase text-[#010b19]">
                 {isRegister ? 'Start free' : 'Welcome back'}
               </p>
-              <h1 className="whitespace-nowrap text-[clamp(22px,3vw,42px)] font-black uppercase leading-none text-slate-950">
+              <h1 className="whitespace-nowrap text-[clamp(22px,2.85vw,40px)] font-black uppercase leading-none text-slate-950">
                 {isRegister ? 'Create your account' : 'Sign in to Landed'}
               </h1>
 
-              <p className="mx-auto mt-[clamp(12px,2.1vh,24px)] max-w-[330px] text-sm font-medium leading-5 text-slate-700">
+              <p className="mx-auto mt-[clamp(12px,2.1vh,24px)] max-w-[330px] text-sm font-medium leading-5 text-slate-700 lg:mx-0">
                 {isRegister
                   ? 'Build one calm workspace for applications, resumes, interview notes, and next moves.'
                   : 'Track every role, resume version, interview loop, and follow-up from one focused dashboard.'}
               </p>
+
+              {authError ? (
+                <div className="mx-auto mt-4 max-w-[360px] border border-rose-200 bg-rose-50 px-4 py-3 text-left text-sm font-semibold text-rose-700">
+                  {authError}
+                </div>
+              ) : null}
 
               {isRegister ? (
                 <form
@@ -227,10 +250,14 @@ export const LoginPage = () => {
             <p className="font-mono text-[11px] font-bold uppercase text-slate-700">
               Works on top job platforms like
             </p>
-            <div className="mt-[clamp(10px,1.8vh,20px)] flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-lg font-black text-slate-300 sm:text-xl">
-              {partners.map((partner) => (
-                <span key={partner}>{partner}</span>
-              ))}
+            <div className="relative mt-[clamp(10px,1.8vh,20px)] overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
+              <div className="flex w-max animate-[platform-marquee_22s_linear_infinite] items-center gap-10 text-lg font-black text-slate-300 sm:text-xl">
+                {[...partners, ...partners].map((partner, index) => (
+                  <span key={`${partner}-${index}`} className="shrink-0">
+                    {partner}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>

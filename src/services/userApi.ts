@@ -1,12 +1,13 @@
-import { apiClient, withMockFallback } from '../lib/apiClient';
-import { mockUser } from '../lib/mockData';
+import { apiClient } from '../lib/apiClient';
 import type { UpdateProfilePayload, User } from '../types/user';
 
 export const userApi = {
   async getCurrentUser(): Promise<User> {
-    return withMockFallback(apiClient.get<User>('/users/me'), mockUser);
+    const response = await apiClient.get<User>('/users/me');
+    return response.data;
   },
   async updateProfile(payload: UpdateProfilePayload): Promise<User> {
-    return withMockFallback(apiClient.put<User>('/users/me', payload), { ...mockUser, ...payload });
+    const response = await apiClient.put<User>('/users/me', payload);
+    return response.data;
   }
 };

@@ -48,4 +48,8 @@ public class User {
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
     public Instant getCreatedAt() { return createdAt; }
+
+    public void updateName(String name) {
+        this.name = name;
+    }
 }

@@ -1,4 +1,5 @@
 import { apiClient } from '../lib/apiClient';
+import { localDataStore, shouldUseLocalDataFallback } from '../lib/localDataStore';
 import type { Application, ApplicationPayload, ApplicationStatus } from '../types/application';
 
 type BackendApplicationStatus = 'SAVED' | 'APPLIED' | 'OA' | 'INTERVIEW' | 'OFFER' | 'REJECTED' | 'ACCEPTED';
@@ -114,22 +115,63 @@ const mapPayload = (payload: ApplicationPayload): BackendApplicationRequest => (
 
 export const applicationApi = {
   async list(): Promise<Application[]> {
-    const response = await apiClient.get<BackendApplicationResponse[]>('/applications');
-    return response.data.map(mapApplication);
+    try {
+      const response = await apiClient.get<BackendApplicationResponse[]>('/applications');
+      return response.data.map(mapApplication);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.listApplications();
+      }
+
+      throw error;
+    }
   },
   async get(id: string): Promise<Application | undefined> {
-    const applications = await this.list();
-    return applications.find((application) => application.id === id);
+    try {
+      const applications = await this.list();
+      return applications.find((application) => application.id === id);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.getApplication(id);
+      }
+
+      throw error;
+    }
   },
   async create(payload: ApplicationPayload): Promise<Application> {
-    const response = await apiClient.post<BackendApplicationResponse>('/applications', mapPayload(payload));
-    return mapApplication(response.data);
+    try {
+      const response = await apiClient.post<BackendApplicationResponse>('/applications', mapPayload(payload));
+      return mapApplication(response.data);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.createApplication(payload);
+      }
+
+      throw error;
+    }
   },
   async update(id: string, payload: ApplicationPayload): Promise<Application> {
-    const response = await apiClient.put<BackendApplicationResponse>('/applications/' + id, mapPayload(payload));
-    return mapApplication(response.data);
+    try {
+      const response = await apiClient.put<BackendApplicationResponse>('/applications/' + id, mapPayload(payload));
+      return mapApplication(response.data);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.updateApplication(id, payload);
+      }
+
+      throw error;
+    }
   },
   async remove(id: string): Promise<void> {
-    await apiClient.delete('/applications/' + id);
+    try {
+      await apiClient.delete('/applications/' + id);
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        localDataStore.removeApplication(id);
+        return;
+      }
+
+      throw error;
+    }
   }
 };

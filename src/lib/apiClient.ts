@@ -1,5 +1,10 @@
 import axios, { AxiosError } from 'axios';
 
+type ApiErrorBody = {
+  message?: string;
+  fieldErrors?: Record<string, string>;
+};
+
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1';
 export const TOKEN_KEY = 'landed.jwt';
 
@@ -21,29 +26,24 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  (error: AxiosError<ApiErrorBody>) => {
     const status = error.response?.status;
     if (status === 401) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem('landed.user');
     }
 
+    const fieldErrors = error.response?.data?.fieldErrors;
+    const firstFieldError = fieldErrors ? Object.values(fieldErrors)[0] : undefined;
+    const apiMessage = firstFieldError ?? error.response?.data?.message;
     const message =
-      status === 403
+      apiMessage ??
+      (status === 403
         ? 'You do not have permission to perform this action.'
         : status === 500
           ? 'The server hit an unexpected error. Please try again.'
-          : error.message;
+          : error.message);
 
     return Promise.reject(new Error(message));
   }
 );
-
-export const withMockFallback = async <T>(request: Promise<{ data: T }>, fallback: T): Promise<T> => {
-  try {
-    const response = await request;
-    return response.data;
-  } catch {
-    return fallback;
-  }
-};

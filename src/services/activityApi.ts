@@ -1,4 +1,5 @@
 import { apiClient } from '../lib/apiClient';
+import { localDataStore, shouldUseLocalDataFallback } from '../lib/localDataStore';
 import type { Activity } from '../types/activity';
 
 interface BackendActivityResponse {
@@ -21,9 +22,17 @@ const mapActivity = (activity: BackendActivityResponse): Activity => ({
 
 export const activityApi = {
   async list(): Promise<Activity[]> {
-    const response = await apiClient.get<BackendActivityResponse[]>('/activities');
-    return response.data
-      .map(mapActivity)
-      .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime());
+    try {
+      const response = await apiClient.get<BackendActivityResponse[]>('/activities');
+      return response.data
+        .map(mapActivity)
+        .sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime());
+    } catch (error) {
+      if (shouldUseLocalDataFallback(error)) {
+        return localDataStore.listActivities();
+      }
+
+      throw error;
+    }
   }
 };

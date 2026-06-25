@@ -9,13 +9,15 @@ export const DashboardLayout = () => {
   const title = usePageTitle();
 
   return (
-    <div className="min-h-screen bg-white lg:flex">
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="min-w-0 flex-1">
-        <Navbar title={title} onMenuClick={() => setSidebarOpen(true)} />
-        <main>
-          <Outlet />
-        </main>
+    <div className="min-h-screen overflow-hidden bg-[#f7f7f6]">
+      <div className="dashboard-scale-shell min-h-screen lg:flex">
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className="min-w-0 flex-1 lg:pl-0">
+          <Navbar title={title} onMenuClick={() => setSidebarOpen(true)} />
+          <main>
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   );

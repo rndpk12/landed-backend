@@ -49,7 +49,8 @@ export const SettingsPage = () => {
             </div>
             <div>
               <label className="text-sm font-semibold text-slate-700">Email</label>
-              <input className="input mt-2" type="email" {...register('email')} />
+              <input className="input mt-2 bg-slate-50 text-slate-500" type="email" readOnly {...register('email')} />
+              <p className="mt-1 text-xs text-slate-500">Used for sign in.</p>
               {errors.email ? <p className="mt-1 text-xs text-rose-600">{errors.email.message}</p> : null}
             </div>
           </div>

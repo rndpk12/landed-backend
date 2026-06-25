@@ -16,8 +16,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await authApi.login(credentials);
       authApi.saveToken(response.token);
-      const currentUser = await authApi.getCurrentUser();
-      setUser(currentUser);
+      setUser(response.user);
     } finally {
       setLoading(false);
     }
@@ -28,8 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await authApi.register(payload);
       authApi.saveToken(response.token);
-      const currentUser = await authApi.getCurrentUser();
-      setUser(currentUser);
+      setUser(response.user);
     } finally {
       setLoading(false);
     }
