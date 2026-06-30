@@ -4,7 +4,6 @@ import type { User } from '../types/user';
 
 const MOCK_USER_KEY = 'landed.mockUser';
 const MOCK_AUTH_USERS_KEY = 'landed.mockAuthUsers';
-const GOOGLE_SCRIPT_ID = 'google-identity-services';
 
 type StoredMockUser = User & {
   password: string;
@@ -53,124 +52,24 @@ type GoogleConfigResponse = {
   clientId?: string;
 };
 
-let cachedGoogleClientId: string | null = null;
-
-const getGoogleClientId = async () => {
+const getEnvGoogleClientId = () => {
   const envClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
-
-  if (envClientId?.trim()) {
-    return envClientId.trim();
-  }
-
-  if (cachedGoogleClientId) {
-    return cachedGoogleClientId;
-  }
-
-  const response = await apiClient.get<GoogleConfigResponse>('/auth/google/config');
-  const serverClientId = response.data.clientId?.trim();
-
-  if (serverClientId) {
-    cachedGoogleClientId = serverClientId;
-    return serverClientId;
-  }
-
-  throw new Error('Google sign-in is not configured on the server.');
+  return envClientId?.trim() ?? '';
 };
 
-type GoogleCredentialResponse = {
-  credential?: string;
-};
-
-type GooglePromptMomentNotification = {
-  isNotDisplayed: () => boolean;
-  isSkippedMoment: () => boolean;
-  getNotDisplayedReason: () => string;
-  getSkippedReason: () => string;
-};
-
-type GoogleAccountsId = {
-  initialize: (config: {
-    client_id: string;
-    callback: (response: GoogleCredentialResponse) => void;
-    auto_select?: boolean;
-    cancel_on_tap_outside?: boolean;
-  }) => void;
-  prompt: (momentListener?: (notification: GooglePromptMomentNotification) => void) => void;
-  cancel: () => void;
-};
-
-declare global {
-  interface Window {
-    google?: {
-      accounts?: {
-        id?: GoogleAccountsId;
-      };
-    };
+const isGoogleSignInConfigured = async () => {
+  const envClientId = getEnvGoogleClientId();
+  if (!envClientId) {
+    return false;
   }
-}
 
-const loadGoogleIdentityServices = () =>
-  new Promise<void>((resolve, reject) => {
-    if (window.google?.accounts?.id) {
-      resolve();
-      return;
-    }
-
-    const existingScript = document.getElementById(GOOGLE_SCRIPT_ID) as HTMLScriptElement | null;
-    if (existingScript) {
-      existingScript.addEventListener('load', () => resolve(), { once: true });
-      existingScript.addEventListener('error', () => reject(new Error('Could not load Google sign-in.')), {
-        once: true
-      });
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.id = GOOGLE_SCRIPT_ID;
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Could not load Google sign-in.'));
-    document.head.appendChild(script);
-  });
-
-const requestGoogleCredential = async () => {
-  const clientId = await getGoogleClientId();
-
-  await loadGoogleIdentityServices();
-
-  return new Promise<string>((resolve, reject) => {
-    let settled = false;
-    const fail = (message: string) => {
-      if (!settled) {
-        settled = true;
-        window.google?.accounts?.id?.cancel();
-        reject(new Error(message));
-      }
-    };
-
-    window.google?.accounts?.id?.initialize({
-      client_id: clientId,
-      auto_select: false,
-      cancel_on_tap_outside: true,
-      callback: (response) => {
-        if (response.credential) {
-          settled = true;
-          resolve(response.credential);
-          return;
-        }
-
-        fail('Google did not return a sign-in credential.');
-      }
-    });
-
-    window.google?.accounts?.id?.prompt((notification) => {
-      if (notification?.isNotDisplayed() || notification?.isSkippedMoment()) {
-        fail('Google sign-in was cancelled or could not be shown.');
-      }
-    });
-  });
+  try {
+    const response = await apiClient.get<GoogleConfigResponse>('/auth/google/config');
+    const serverClientId = response.data.clientId?.trim();
+    return serverClientId === envClientId;
+  } catch {
+    return false;
+  }
 };
 
 const readStoredMockUsers = (): StoredMockUser[] => {
@@ -263,11 +162,11 @@ export const authApi = {
       return createMockAuthResponse(toPublicMockUser(user));
     }
   },
-  async signInWithGoogle(): Promise<AuthResponse> {
-    const credential = await requestGoogleCredential();
+  async signInWithGoogle(credential: string): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>('/auth/google', { credential });
     return response.data;
   },
+  isGoogleSignInConfigured,
   async getCurrentUser(): Promise<User> {
     const token = localStorage.getItem(TOKEN_KEY);
     const mockUser = token?.startsWith('landed.mock.') ? getStoredMockUser() : null;

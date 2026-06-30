@@ -19,6 +19,7 @@ JWT authentication is stateless, so the API can run as a single Railway web serv
 | Variable | Example |
 |---|---|
 | `VITE_API_BASE_URL` | `https://landed-api.up.railway.app/api/v1` |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth web client ID |
 
 ### Backend, Railway
 
@@ -27,6 +28,7 @@ JWT authentication is stateless, so the API can run as a single Railway web serv
 | `SPRING_PROFILES_ACTIVE` | `prod` |
 | `DATABASE_URL` | `postgresql://user:password@host.neon.tech/db?sslmode=require` |
 | `JWT_SECRET` | Base64 string from `openssl rand -base64 64` |
+| `GOOGLE_CLIENT_ID` | Same Google OAuth web client ID used by Vercel |
 | `CORS_ALLOWED_ORIGINS` | `https://landed.vercel.app,https://www.yourdomain.com` |
 
 Optional backend variables:
@@ -216,3 +218,5 @@ docker build -t landed-api:prod .
 4. Vercel `VITE_API_BASE_URL` points to Railway with `/api/v1`.
 5. Railway `CORS_ALLOWED_ORIGINS` includes the Vercel/custom frontend origin.
 6. Vercel deployment loads and login/register calls reach the API.
+7. Google sign-in appears only when `VITE_GOOGLE_CLIENT_ID` or backend `GOOGLE_CLIENT_ID`
+   is configured, and both frontend/backend values match.

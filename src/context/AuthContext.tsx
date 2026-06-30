@@ -33,10 +33,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (credential: string) => {
     setLoading(true);
     try {
-      const response = await authApi.signInWithGoogle();
+      const response = await authApi.signInWithGoogle(credential);
       authApi.saveToken(response.token);
       setUser(response.user);
     } finally {

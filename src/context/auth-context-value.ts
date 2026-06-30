@@ -7,7 +7,7 @@ export interface AuthContextValue {
   loading: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
   getCurrentUser: () => Promise<User | null>;
   isAuthenticated: () => boolean;

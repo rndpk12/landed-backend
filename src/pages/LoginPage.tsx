@@ -1,10 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, type FieldError, type UseFormRegisterReturn } from 'react-hook-form';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useAuth } from '../hooks/useAuth';
+import { authApi } from '../services/authApi';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email.'),
@@ -68,6 +70,7 @@ export const LoginPage = () => {
     searchParams.get('mode') === 'register' ? 'register' : 'login'
   );
   const [authError, setAuthError] = useState<string | null>(null);
+  const [googleSignInAvailable, setGoogleSignInAvailable] = useState(false);
 
   const loginForm = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -82,6 +85,20 @@ export const LoginPage = () => {
   useEffect(() => {
     setMode(searchParams.get('mode') === 'register' ? 'register' : 'login');
   }, [searchParams]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    authApi.isGoogleSignInConfigured().then((isConfigured) => {
+      if (isMounted) {
+        setGoogleSignInAvailable(isConfigured);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   if (isAuthenticated()) {
     return <Navigate to="/dashboard" replace />;
@@ -107,10 +124,15 @@ export const LoginPage = () => {
     }
   };
 
-  const onGoogleSignIn = async () => {
+  const onGoogleSignIn = async (credentialResponse: CredentialResponse) => {
     setAuthError(null);
+    if (!credentialResponse.credential) {
+      setAuthError('Google did not return a sign-in credential.');
+      return;
+    }
+
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(credentialResponse.credential);
       navigate(from, { replace: true });
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : 'Could not sign in with Google. Please try again.');
@@ -126,18 +148,25 @@ export const LoginPage = () => {
   };
 
   const isRegister = mode === 'register';
+  const AuthDivider = () => (
+    <div className="flex items-center gap-3 text-center font-mono text-[10px] font-bold uppercase text-slate-400">
+      <span className="h-px flex-1 bg-slate-200" />
+      or
+      <span className="h-px flex-1 bg-slate-200" />
+    </div>
+  );
   const GoogleSignInButton = () => (
-    <button
-      className="inline-flex h-[44px] w-full items-center justify-center gap-3 border-2 border-slate-950/15 bg-white px-7 font-mono text-sm font-bold uppercase text-slate-950 transition hover:border-slate-950 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
-      type="button"
-      onClick={onGoogleSignIn}
-      disabled={loading}
-    >
-      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white font-sans text-sm font-black normal-case text-[#4285f4]">
-        G
-      </span>
-      {loading ? 'Connecting...' : 'Sign in with Google'}
-    </button>
+    <div className={loading ? 'pointer-events-none opacity-70' : undefined}>
+      <GoogleLogin
+        onSuccess={onGoogleSignIn}
+        onError={() => setAuthError('Google login failed. Please try again.')}
+        shape="rectangular"
+        size="large"
+        text="signin_with"
+        theme="outline"
+        width="360"
+      />
+    </div>
   );
 
   return (
@@ -222,12 +251,12 @@ export const LoginPage = () => {
                     {loading ? 'Creating account...' : 'Create account'}
                     {!loading ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
                   </button>
-                  <div className="flex items-center gap-3 text-center font-mono text-[10px] font-bold uppercase text-slate-400">
-                    <span className="h-px flex-1 bg-slate-200" />
-                    or
-                    <span className="h-px flex-1 bg-slate-200" />
-                  </div>
-                  <GoogleSignInButton />
+                  {googleSignInAvailable ? (
+                    <>
+                      <AuthDivider />
+                      <GoogleSignInButton />
+                    </>
+                  ) : null}
                 </form>
               ) : (
                 <form
@@ -259,12 +288,12 @@ export const LoginPage = () => {
                     {loading ? 'Signing in...' : 'Login / sign in'}
                     {!loading ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
                   </button>
-                  <div className="flex items-center gap-3 text-center font-mono text-[10px] font-bold uppercase text-slate-400">
-                    <span className="h-px flex-1 bg-slate-200" />
-                    or
-                    <span className="h-px flex-1 bg-slate-200" />
-                  </div>
-                  <GoogleSignInButton />
+                  {googleSignInAvailable ? (
+                    <>
+                      <AuthDivider />
+                      <GoogleSignInButton />
+                    </>
+                  ) : null}
                 </form>
               )}
 
