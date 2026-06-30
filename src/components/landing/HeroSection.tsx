@@ -48,7 +48,7 @@ export const HeroSection = () => {
         {[
           ['3x', 'more callbacks'],
           ['40%', 'less time tracking'],
-          ['2,400+', 'early members']
+          ['100+', 'early members']
         ].map(([num, label], index) => (
           <div className="contents" key={label}>
             {index > 0 ? <div className="hidden h-9 w-px bg-[#d4d4d4] sm:block" /> : null}
