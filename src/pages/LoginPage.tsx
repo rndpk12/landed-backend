@@ -57,7 +57,7 @@ const AuthField = ({ label, type, placeholder, autoComplete, error, registration
 };
 
 export const LoginPage = () => {
-  const { login, register: createAccount, isAuthenticated, loading } = useAuth();
+  const { login, register: createAccount, signInWithGoogle, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -107,6 +107,16 @@ export const LoginPage = () => {
     }
   };
 
+  const onGoogleSignIn = async () => {
+    setAuthError(null);
+    try {
+      await signInWithGoogle();
+      navigate(from, { replace: true });
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : 'Could not sign in with Google. Please try again.');
+    }
+  };
+
   const switchMode = (next: AuthMode) => {
     setMode(next);
     setSearchParams(next === 'register' ? { mode: 'register' } : {});
@@ -116,6 +126,19 @@ export const LoginPage = () => {
   };
 
   const isRegister = mode === 'register';
+  const GoogleSignInButton = () => (
+    <button
+      className="inline-flex h-[44px] w-full items-center justify-center gap-3 border-2 border-slate-950/15 bg-white px-7 font-mono text-sm font-bold uppercase text-slate-950 transition hover:border-slate-950 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+      type="button"
+      onClick={onGoogleSignIn}
+      disabled={loading}
+    >
+      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white font-sans text-sm font-black normal-case text-[#4285f4]">
+        G
+      </span>
+      {loading ? 'Connecting...' : 'Sign in with Google'}
+    </button>
+  );
 
   return (
     <main className="h-screen overflow-hidden bg-[#010b19] p-1 font-sans text-white">
@@ -199,6 +222,12 @@ export const LoginPage = () => {
                     {loading ? 'Creating account...' : 'Create account'}
                     {!loading ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
                   </button>
+                  <div className="flex items-center gap-3 text-center font-mono text-[10px] font-bold uppercase text-slate-400">
+                    <span className="h-px flex-1 bg-slate-200" />
+                    or
+                    <span className="h-px flex-1 bg-slate-200" />
+                  </div>
+                  <GoogleSignInButton />
                 </form>
               ) : (
                 <form
@@ -230,6 +259,12 @@ export const LoginPage = () => {
                     {loading ? 'Signing in...' : 'Login / sign in'}
                     {!loading ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
                   </button>
+                  <div className="flex items-center gap-3 text-center font-mono text-[10px] font-bold uppercase text-slate-400">
+                    <span className="h-px flex-1 bg-slate-200" />
+                    or
+                    <span className="h-px flex-1 bg-slate-200" />
+                  </div>
+                  <GoogleSignInButton />
                 </form>
               )}
 

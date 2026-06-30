@@ -9,6 +9,8 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localho
 export const TOKEN_KEY = 'landed.jwt';
 const REQUEST_TIMEOUT_MS = 30_000;
 const isProductionMissingApiUrl = import.meta.env.PROD && !import.meta.env.VITE_API_BASE_URL;
+export const BACKEND_UNAVAILABLE_MESSAGE =
+  'The sign-in server is taking too long to respond. Please try again in a moment.';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -44,11 +46,11 @@ apiClient.interceptors.response.use(
     const apiMessage = firstFieldError ?? error.response?.data?.message;
     const timeoutMessage =
       error.code === 'ECONNABORTED' || error.message.includes('timeout')
-        ? 'The backend API did not respond in time. Check that VITE_API_BASE_URL points to a live backend and that the backend database is awake.'
+        ? BACKEND_UNAVAILABLE_MESSAGE
         : undefined;
     const networkMessage =
       error.message === 'Network Error'
-        ? 'Could not reach the backend API. Check VITE_API_BASE_URL and backend CORS settings.'
+        ? 'Could not reach the sign-in server. Please try again in a moment.'
         : undefined;
     const message =
       apiMessage ??

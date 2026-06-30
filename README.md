@@ -35,10 +35,13 @@ export DB_URL=jdbc:postgresql://localhost:5432/landed
 export DB_USERNAME=landed
 export DB_PASSWORD=your-password
 export JWT_SECRET="$(openssl rand -base64 64)"
+export GOOGLE_CLIENT_ID=your-google-oauth-web-client-id
 mvn spring-boot:run
 ```
 
 `JWT_SECRET` is intentionally required. It must be Base64-encoded and decode to at least 32 bytes.
+Use the same Google OAuth web client ID for backend `GOOGLE_CLIENT_ID` and frontend
+`VITE_GOOGLE_CLIENT_ID` so Google sign-in can launch and the backend can verify the credential.
 
 ## API
 
@@ -84,6 +87,7 @@ Statuses: `SAVED`, `APPLIED`, `OA`, `INTERVIEW`, `OFFER`, `REJECTED`, `ACCEPTED`
 | Variable | Required | Default |
 |---|---:|---|
 | `JWT_SECRET` | yes | none |
+| `GOOGLE_CLIENT_ID` | for Google sign-in | none |
 | `JWT_EXPIRATION` | no | `86400000` ms |
 | `DB_URL` | no | `jdbc:postgresql://localhost:5432/landed` |
 | `DB_USERNAME` | no | `landed` |

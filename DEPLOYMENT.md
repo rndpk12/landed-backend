@@ -66,6 +66,7 @@ At startup, Landed converts `DATABASE_URL` into the JDBC datasource settings Spr
 SPRING_PROFILES_ACTIVE=prod
 DATABASE_URL=postgresql://...
 JWT_SECRET=<openssl rand -base64 64>
+GOOGLE_CLIENT_ID=your-google-oauth-web-client-id
 CORS_ALLOWED_ORIGINS=https://your-vercel-app.vercel.app
 ```
 
@@ -98,9 +99,13 @@ dist
 
 ```text
 VITE_API_BASE_URL=https://your-railway-api-domain/api/v1
+VITE_GOOGLE_CLIENT_ID=your-google-oauth-web-client-id
 ```
 
 6. Deploy.
+
+Use the same Google OAuth web client ID for the backend `GOOGLE_CLIENT_ID` variable so the API
+can verify credentials returned by the frontend.
 
 `vercel.json` rewrites browser routes to `index.html` so protected app routes work after refresh.
 

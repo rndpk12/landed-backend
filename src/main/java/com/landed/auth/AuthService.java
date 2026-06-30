@@ -1,13 +1,17 @@
 package com.landed.auth;
 
 import com.landed.auth.dto.AuthResponse;
+import com.landed.auth.dto.GoogleAuthRequest;
 import com.landed.auth.dto.LoginRequest;
 import com.landed.auth.dto.RegisterRequest;
+import com.landed.common.exception.BadRequestException;
 import com.landed.common.exception.ConflictException;
 import com.landed.security.JwtService;
 import com.landed.user.User;
 import com.landed.user.UserRepository;
 import com.landed.user.dto.UserProfileResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,8 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -24,13 +32,19 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RestClient restClient;
+    private final String googleClientId;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       AuthenticationManager authenticationManager, JwtService jwtService) {
+                       AuthenticationManager authenticationManager, JwtService jwtService,
+                       RestClient.Builder restClientBuilder,
+                       @Value("${app.google.client-id:}") String googleClientId) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.restClient = restClientBuilder.build();
+        this.googleClientId = googleClientId;
     }
 
     @Transactional
@@ -59,6 +73,26 @@ public class AuthService {
         return responseFor(user);
     }
 
+    @Transactional
+    public AuthResponse google(GoogleAuthRequest request) {
+        if (googleClientId == null || googleClientId.isBlank()) {
+            throw new BadRequestException("Google sign-in is not configured");
+        }
+
+        GoogleTokenInfo tokenInfo = verifyGoogleCredential(request.credential());
+        if (!googleClientId.equals(tokenInfo.audience())) {
+            throw new BadRequestException("Google sign-in credential is for a different app");
+        }
+        if (!Boolean.TRUE.equals(tokenInfo.emailVerified())) {
+            throw new BadRequestException("Google account email is not verified");
+        }
+
+        String email = normalizeEmail(tokenInfo.email());
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseGet(() -> createGoogleUser(email, tokenInfo.name()));
+        return responseFor(user);
+    }
+
     private AuthResponse responseFor(User user) {
         return new AuthResponse(jwtService.generateToken(user.getEmail()), "Bearer",
                 jwtService.getExpirationSeconds(), UserProfileResponse.from(user));
@@ -66,5 +100,44 @@ public class AuthService {
 
     private String normalizeEmail(String email) {
         return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private User createGoogleUser(String email, String name) {
+        String displayName = name == null || name.isBlank() ? email.substring(0, email.indexOf('@')) : name.trim();
+        User user = new User(displayName, email, passwordEncoder.encode(UUID.randomUUID().toString()));
+        try {
+            return userRepository.saveAndFlush(user);
+        } catch (DataIntegrityViolationException exception) {
+            return userRepository.findByEmailIgnoreCase(email).orElseThrow();
+        }
+    }
+
+    private GoogleTokenInfo verifyGoogleCredential(String credential) {
+        try {
+            var uri = UriComponentsBuilder.fromUriString("https://oauth2.googleapis.com/tokeninfo")
+                    .queryParam("id_token", credential)
+                    .build()
+                    .toUri();
+            GoogleTokenInfo tokenInfo = restClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .body(GoogleTokenInfo.class);
+
+            if (tokenInfo == null || tokenInfo.email() == null || tokenInfo.email().isBlank()) {
+                throw new BadRequestException("Google did not return an email address");
+            }
+
+            return tokenInfo;
+        } catch (RestClientException exception) {
+            throw new BadRequestException("Google sign-in credential could not be verified", exception);
+        }
+    }
+
+    private record GoogleTokenInfo(
+            @JsonProperty("aud") String audience,
+            String email,
+            @JsonProperty("email_verified") Boolean emailVerified,
+            String name
+    ) {
     }
 }

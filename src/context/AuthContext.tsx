@@ -33,6 +33,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await authApi.signInWithGoogle();
+      authApi.saveToken(response.token);
+      setUser(response.user);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     authApi.clearToken();
     localStorage.removeItem('landed.user');
@@ -68,8 +79,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [getCurrentUser]);
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, getCurrentUser, isAuthenticated }),
-    [user, loading, login, register, logout, getCurrentUser, isAuthenticated]
+    () => ({ user, loading, login, register, signInWithGoogle, logout, getCurrentUser, isAuthenticated }),
+    [user, loading, login, register, signInWithGoogle, logout, getCurrentUser, isAuthenticated]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
