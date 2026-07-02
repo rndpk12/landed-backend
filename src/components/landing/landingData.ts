@@ -1,5 +1,6 @@
 import {
   Activity,
+  BarChart3,
   Briefcase,
   Code2,
   FileText,
@@ -17,9 +18,9 @@ export const jobBoards = [
   'Greenhouse',
   'Lever',
   'Workday',
+  'Ashby',
   'Wellfound',
   'ZipRecruiter',
-  'shine.com',
   'Instahyre',
   'Monster'
 ];
@@ -62,84 +63,97 @@ export const applications = [
 
 export const features = [
   {
-    title: 'Version control for resumes',
-    body: "Name, tag, and retrieve any version in seconds. The system keeps track so you don't have to.",
+    title: 'Resume vault',
+    body: 'Upload, tag, switch, and compare multiple resume versions without hunting through folders.',
     icon: FileText,
-    iconClass: 'bg-[rgba(249,115,22,0.1)] text-[#f97316]'
+    color: 'bg-[#f97316]'
   },
   {
-    title: 'Unified application board',
-    body: 'All your jobs in one view. Filter by status, company, or the resume version you used.',
+    title: 'Pipeline tracker',
+    body: 'See every company, role, stage, next action, and resume version in one loud dashboard.',
     icon: Grid2X2,
-    iconClass: 'bg-[rgba(99,102,241,0.1)] text-[#818cf8]'
+    color: 'bg-[#5dd6e4]'
   },
   {
-    title: 'Side-by-side diff view',
-    body: 'Instantly see what changed between any two resume versions with a clean, readable diff.',
+    title: 'Resume diff',
+    body: 'Compare two versions line by line and understand which edits improved your story.',
     icon: Code2,
-    iconClass: 'bg-[rgba(34,197,94,0.1)] text-[#4ade80]'
+    color: 'bg-[#f5b8d4]'
   },
   {
-    title: 'One-click job import',
-    body: 'Paste a URL from LinkedIn, Naukri, or Greenhouse. Landed fills in company, role, and description.',
+    title: 'Job import',
+    body: 'Paste a job URL from popular boards and Landed extracts the company, role, and details.',
     icon: LinkIcon,
-    iconClass: 'bg-[rgba(251,146,60,0.1)] text-[#fb923c]'
+    color: 'bg-[#f9d44a]'
   },
   {
-    title: 'Stage-by-stage pipeline',
-    body: 'Applied -> Screening -> Interview -> Offer. Track every transition with timestamps and notes.',
+    title: 'Activity timeline',
+    body: 'Every stage change, note, and follow-up is captured so your next move stays obvious.',
     icon: Activity,
-    iconClass: 'bg-[rgba(244,63,94,0.1)] text-[#fb7185]'
+    color: 'bg-[#96d35f]'
   },
   {
-    title: 'Interview notes & context',
-    body: "Attach notes to each stage so you always know what was discussed and what's next.",
+    title: 'Performance analytics',
+    body: 'Measure callbacks, stalled stages, and which resume versions are doing the most work.',
+    icon: BarChart3,
+    color: 'bg-[#a78bfa]'
+  },
+  {
+    title: 'Interview notes',
+    body: 'Attach notes to every application so prep, questions, and recruiter context stay together.',
     icon: MessageSquare,
-    iconClass: 'bg-[rgba(251,191,36,0.1)] text-[#fbbf24]'
+    color: 'bg-[#60a5fa]'
+  }
+];
+
+export const steps = [
+  {
+    number: '1',
+    title: 'Build your profile',
+    body: 'Add resumes, links, skills, work history, and job preferences once.'
+  },
+  {
+    number: '2',
+    title: 'Import every job',
+    body: 'Paste job links or add applications manually with the resume version you used.'
+  },
+  {
+    number: '3',
+    title: 'Track to offer',
+    body: 'Move stages, add notes, compare outcomes, and keep follow-ups on rails.'
+  }
+];
+
+export const faqs = [
+  {
+    question: 'Is Landed an autofill browser extension?',
+    answer:
+      'Landed is focused on the full job-search operating system: resume vault, job import, application tracking, interview notes, and analytics. It helps you know what you sent, where you sent it, and what to do next.'
+  },
+  {
+    question: 'Can I manage multiple resumes?',
+    answer:
+      'Yes. Store multiple resume versions, tag them by role or company type, and attach the exact version to each application.'
+  },
+  {
+    question: 'Which job boards can I import from?',
+    answer:
+      'Landed supports common job sources such as LinkedIn, Naukri, Greenhouse, Lever, Workday, Ashby, Wellfound, and generic career pages.'
+  },
+  {
+    question: 'Does Landed replace my spreadsheet?',
+    answer:
+      'That is the idea. Instead of rows and manual notes, you get structured applications, stage history, resume links, notes, and analytics.'
+  },
+  {
+    question: 'Is there a free plan?',
+    answer:
+      'Yes. Start free with the core tracker and resume vault workflow, then upgrade when you need deeper analytics and power-user limits.'
   }
 ];
 
 export const roles = [
-  {
-    title: 'Active Job Seekers',
-    body: 'Live pipeline tracking and version signals to stay on top of every active application.',
-    icon: Activity
-  },
-  {
-    title: 'Career Switchers',
-    body: 'Multiple resume variants per industry, with diff views to tailor each application precisely.',
-    icon: Briefcase
-  },
-  {
-    title: 'Placement Advisors',
-    body: 'Client-ready application summaries and resume comparison tools for superior placement outcomes.',
-    icon: Users
-  }
-];
-
-export const insights = [
-  {
-    title: 'Video Tutorials',
-    body: 'How-to videos on resume tools, features, and smarter job searching.',
-    className: 'bg-[#f5b8d4] text-[#0a0a0a]',
-    deco: 'line'
-  },
-  {
-    title: 'Academy',
-    body: 'Learning center with guides, glossary, help docs, and expert tips.',
-    className: 'bg-[#7c6df0] text-white',
-    deco: 'target'
-  },
-  {
-    title: 'Job Market Lens',
-    body: 'Actionable insights across tech, finance, startup, and remote roles.',
-    className: 'bg-[#5dd6e4] text-[#0a0a0a]',
-    deco: 'globe'
-  },
-  {
-    title: 'Smart Signals',
-    body: 'Explore AI-driven resume signals to apply more confidently.',
-    className: 'bg-[#e2a84a] text-[#0a0a0a]',
-    deco: 'peak'
-  }
+  { title: 'Active Job Seekers', body: 'Keep dozens of applications moving without spreadsheet drift.', icon: Activity },
+  { title: 'Career Switchers', body: 'Test resume variants and learn which positioning gets traction.', icon: Briefcase },
+  { title: 'Placement Advisors', body: 'Organize client pipelines, notes, and resume outcomes.', icon: Users }
 ];
