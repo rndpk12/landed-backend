@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Check, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, type FieldError, type UseFormRegisterReturn } from 'react-hook-form';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
@@ -24,36 +24,35 @@ type RegisterValues = z.infer<typeof registerSchema>;
 type AuthMode = 'login' | 'register';
 
 type FieldProps = {
-  label: string;
-  type: string;
-  placeholder: string;
   autoComplete: string;
   error?: FieldError;
+  label: string;
+  placeholder: string;
   registration: UseFormRegisterReturn;
-  compact?: boolean;
+  type: string;
 };
 
 const partners = ['LinkedIn', 'Indeed', 'Workday', 'Greenhouse', 'Instahyre', 'Lever', 'Ashby', 'Naukri'];
 
-const AuthField = ({ label, type, placeholder, autoComplete, error, registration, compact }: FieldProps) => {
+const AuthField = ({ label, type, placeholder, autoComplete, error, registration }: FieldProps) => {
   const inputId = 'auth-' + registration.name;
 
   return (
-    <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-[clamp(4px,0.7vh,8px)]'}`}>
-      <label className={`${compact ? 'text-[10px]' : 'text-[11px]'} font-black uppercase text-slate-950`} htmlFor={inputId}>
+    <div className="flex flex-col gap-2">
+      <label className="text-[12px] font-black uppercase text-black" htmlFor={inputId}>
         {label}
       </label>
       <input
         id={inputId}
-        className={`${compact ? 'h-[38px] px-3 text-xs' : 'h-[clamp(42px,5.8vh,48px)] px-4 text-sm'} w-full rounded-none border-2 bg-white font-semibold text-slate-950 outline-none transition placeholder:text-slate-300 focus:border-slate-950 ${
-          error ? 'border-rose-500' : 'border-slate-950/15'
+        className={`h-12 w-full border-[3px] bg-[#fffaf1] px-4 text-sm font-black text-black outline-none transition placeholder:text-[#9a9489] focus:bg-white focus:shadow-[4px_4px_0_#000] ${
+          error ? 'border-[#ef4444]' : 'border-black'
         }`}
         type={type}
         placeholder={placeholder}
         autoComplete={autoComplete}
         {...registration}
       />
-      {error ? <p className={`${compact ? 'text-[10px]' : 'text-xs'} font-medium text-rose-600`}>{error.message}</p> : null}
+      {error ? <p className="text-xs font-bold text-[#dc2626]">{error.message}</p> : null}
     </div>
   );
 };
@@ -148,13 +147,15 @@ export const LoginPage = () => {
   };
 
   const isRegister = mode === 'register';
+
   const AuthDivider = () => (
-    <div className="flex items-center gap-3 text-center font-mono text-[10px] font-bold uppercase text-slate-400">
-      <span className="h-px flex-1 bg-slate-200" />
+    <div className="flex items-center gap-3 text-center text-[11px] font-black uppercase text-[#6f685f]">
+      <span className="h-[3px] flex-1 bg-black" />
       or
-      <span className="h-px flex-1 bg-slate-200" />
+      <span className="h-[3px] flex-1 bg-black" />
     </div>
   );
+
   const GoogleSignInButton = () => (
     <div className={loading ? 'pointer-events-none opacity-70' : undefined}>
       <GoogleLogin
@@ -170,49 +171,53 @@ export const LoginPage = () => {
   );
 
   return (
-    <main className="h-screen overflow-hidden bg-[#010b19] p-1 font-sans text-white">
-      <section className="grid h-full w-full gap-2 overflow-hidden bg-[#010b19] lg:grid-cols-[0.98fr_1fr]">
-        <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[3px] bg-white text-slate-950">
-          <div className="flex h-[clamp(58px,8vh,72px)] shrink-0 items-center justify-between border-b-[10px] border-[#010b19] px-6 sm:px-8">
+    <main className="landed-brutal brutal-grid min-h-screen overflow-hidden bg-[#fbf7ef] p-3 font-sans text-black">
+      <section className="grid min-h-[calc(100vh-24px)] overflow-hidden border-[4px] border-black bg-[#fffaf1] shadow-[10px_10px_0_#000] lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="flex min-h-0 flex-col">
+          <div className="flex h-[72px] shrink-0 items-center justify-between border-b-[4px] border-black px-5 sm:px-8">
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="bg-transparent text-2xl font-black text-slate-950"
+              className="flex items-center gap-2 bg-transparent text-left"
             >
-              landed.
+              <span className="grid h-10 w-10 place-items-center border-[3px] border-black bg-[#f97316] font-black text-white shadow-[4px_4px_0_#000]">
+                L
+              </span>
+              <span className="text-[22px] font-black italic">LANDED</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode(isRegister ? 'login' : 'register')}
+              className="border-[3px] border-black bg-white px-4 py-2 text-[12px] font-black uppercase shadow-[4px_4px_0_#000] transition hover:-translate-y-0.5"
+            >
+              {isRegister ? 'Log in' : 'Join free'}
             </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-6 py-[clamp(18px,3vh,34px)] text-center sm:px-10 lg:items-start lg:pl-[18%] lg:pr-10">
-            <div className="mb-[clamp(14px,2.5vh,28px)] flex gap-2" aria-hidden="true">
-              <span className="h-3 w-3 bg-slate-950" />
-              <span className="h-3 w-3 bg-slate-950" />
-              <span className="h-3 w-3 bg-slate-950" />
-            </div>
-
-            <div className="w-full max-w-[430px] lg:max-w-[410px]">
-              <p className="mb-[clamp(6px,1vh,12px)] font-mono text-xs font-bold uppercase text-[#010b19]">
-                {isRegister ? 'Start free' : 'Welcome back'}
-              </p>
-              <h1 className="whitespace-nowrap text-[clamp(22px,2.85vw,40px)] font-black uppercase leading-none text-slate-950">
-                {isRegister ? 'Create your account' : 'Sign in to Landed'}
+          <div className="flex flex-1 flex-col justify-center px-5 py-10 sm:px-10 lg:px-[12%]">
+            <div className="w-full max-w-[430px]">
+              <div className="mb-5 inline-flex items-center gap-2 border-2 border-[#f3d8b9] bg-[#fff6e8] px-4 py-2 text-[12px] font-black uppercase text-[#7a3515] shadow-[3px_3px_0_rgba(0,0,0,0.12)]">
+                <Sparkles className="h-4 w-4 text-[#f97316]" />
+                {isRegister ? 'Start landing today' : 'Welcome back'}
+              </div>
+              <h1 className="text-[clamp(42px,6vw,68px)] font-black uppercase leading-[0.95]">
+                {isRegister ? 'Create your account.' : 'Sign in to Landed.'}
               </h1>
-
-              <p className="mx-auto mt-[clamp(12px,2.1vh,24px)] max-w-[330px] text-sm font-medium leading-5 text-slate-700 lg:mx-0">
+              <p className="mt-5 text-[16px] font-bold leading-7 text-[#555]">
                 {isRegister
-                  ? 'Build one calm workspace for applications, resumes, interview notes, and next moves.'
-                  : 'Track every role, resume version, interview loop, and follow-up from one focused dashboard.'}
+                  ? 'Build one workspace for resumes, job links, interview notes, analytics, and every next move.'
+                  : 'Jump back into your pipeline with every application, resume version, and follow-up in sight.'}
               </p>
 
               {authError ? (
-                <div className="mx-auto mt-4 max-w-[360px] border border-rose-200 bg-rose-50 px-4 py-3 text-left text-sm font-semibold text-rose-700">
+                <div className="mt-5 border-[3px] border-[#dc2626] bg-[#fee2e2] px-4 py-3 text-sm font-black text-[#991b1b] shadow-[4px_4px_0_#000]">
                   {authError}
                 </div>
               ) : null}
 
               {isRegister ? (
                 <form
-                  className="mx-auto mt-[clamp(12px,2vh,22px)] flex w-full max-w-[360px] flex-col gap-[clamp(7px,1.1vh,11px)] text-left"
+                  className="mt-7 flex w-full flex-col gap-4 text-left"
                   onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
                   noValidate
                 >
@@ -223,7 +228,6 @@ export const LoginPage = () => {
                     autoComplete="name"
                     error={registerForm.formState.errors.name}
                     registration={registerForm.register('name')}
-                    compact
                   />
                   <AuthField
                     label="Email"
@@ -232,7 +236,6 @@ export const LoginPage = () => {
                     autoComplete="email"
                     error={registerForm.formState.errors.email}
                     registration={registerForm.register('email')}
-                    compact
                   />
                   <AuthField
                     label="Password"
@@ -241,16 +244,8 @@ export const LoginPage = () => {
                     autoComplete="new-password"
                     error={registerForm.formState.errors.password}
                     registration={registerForm.register('password')}
-                    compact
                   />
-                  <button
-                    className="mt-1 inline-flex h-[44px] items-center justify-center gap-3 bg-[#010b19] px-7 font-mono text-sm font-bold uppercase text-white transition hover:bg-[#16385a] disabled:cursor-not-allowed disabled:opacity-70"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? 'Creating account...' : 'Create account'}
-                    {!loading ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
-                  </button>
+                  <AuthButton loading={loading} label="Create account" loadingLabel="Creating account..." />
                   {googleSignInAvailable ? (
                     <>
                       <AuthDivider />
@@ -260,7 +255,7 @@ export const LoginPage = () => {
                 </form>
               ) : (
                 <form
-                  className="mx-auto mt-[clamp(16px,2.6vh,30px)] flex w-full max-w-[360px] flex-col gap-[clamp(10px,1.6vh,16px)] text-left"
+                  className="mt-7 flex w-full flex-col gap-4 text-left"
                   onSubmit={loginForm.handleSubmit(onLoginSubmit)}
                   noValidate
                 >
@@ -280,14 +275,7 @@ export const LoginPage = () => {
                     error={loginForm.formState.errors.password}
                     registration={loginForm.register('password')}
                   />
-                  <button
-                    className="mt-[clamp(4px,0.7vh,8px)] inline-flex h-[clamp(48px,6.5vh,56px)] items-center justify-center gap-3 bg-[#010b19] px-7 font-mono text-sm font-bold uppercase text-white transition hover:bg-[#16385a] disabled:cursor-not-allowed disabled:opacity-70"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? 'Signing in...' : 'Login / sign in'}
-                    {!loading ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
-                  </button>
+                  <AuthButton loading={loading} label="Login / sign in" loadingLabel="Signing in..." />
                   {googleSignInAvailable ? (
                     <>
                       <AuthDivider />
@@ -297,12 +285,12 @@ export const LoginPage = () => {
                 </form>
               )}
 
-              <p className="mt-[clamp(12px,2vh,24px)] text-sm font-semibold text-slate-600">
+              <p className="mt-6 text-sm font-bold text-[#555]">
                 {isRegister ? 'Already have an account?' : 'New here?'}{' '}
                 <button
                   type="button"
                   onClick={() => switchMode(isRegister ? 'login' : 'register')}
-                  className="border-b-2 border-[#010b19] bg-transparent pb-0.5 font-black text-slate-950 focus:outline-none"
+                  className="border-b-[3px] border-[#f97316] bg-transparent pb-0.5 font-black text-black focus:outline-none"
                 >
                   {isRegister ? 'Sign in' : 'Create account'}
                 </button>
@@ -310,12 +298,10 @@ export const LoginPage = () => {
             </div>
           </div>
 
-          <div className="shrink-0 border-t border-slate-200 px-6 py-[clamp(14px,2.2vh,24px)] text-center sm:px-8">
-            <p className="font-mono text-[11px] font-bold uppercase text-slate-700">
-              Works on top job platforms like
-            </p>
-            <div className="relative mt-[clamp(10px,1.8vh,20px)] overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
-              <div className="flex w-max animate-[platform-marquee_22s_linear_infinite] items-center gap-10 text-lg font-black text-slate-300 sm:text-xl">
+          <div className="shrink-0 border-t-[4px] border-black px-5 py-5 sm:px-8">
+            <p className="text-[11px] font-black uppercase text-[#555]">Works on top job platforms like</p>
+            <div className="relative mt-4 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_12%,black_88%,transparent)]">
+              <div className="flex w-max animate-[platform-marquee_22s_linear_infinite] items-center gap-10 text-lg font-black text-[#b9b3a8]">
                 {[...partners, ...partners].map((partner, index) => (
                   <span key={`${partner}-${index}`} className="shrink-0">
                     {partner}
@@ -326,52 +312,68 @@ export const LoginPage = () => {
           </div>
         </div>
 
-        <div className="relative hidden h-full min-h-0 overflow-hidden bg-[#010b19] lg:block">
-          <nav className="relative z-20 grid h-[clamp(58px,8vh,72px)] grid-cols-[1fr_auto] items-stretch bg-white/10 text-sm font-bold text-white">
-            <div className="grid grid-cols-5">
-              {['Roles', 'Resumes', 'Stages', 'Notes', 'Analytics'].map((item) => (
-                <span key={item} className="flex items-center justify-center">
-                  {item}
-                </span>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => switchMode(isRegister ? 'login' : 'register')}
-              className="m-2 bg-white px-7 text-sm font-black text-slate-950 transition hover:bg-slate-100"
-            >
-              {isRegister ? 'Login / Sign in' : 'Create account'}
-            </button>
+        <div className="relative hidden min-h-0 overflow-hidden border-l-[4px] border-black bg-[#09090b] text-white lg:block">
+          <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.18)_1px,transparent_1px)] [background-size:44px_44px]" />
+          <nav className="relative z-20 grid h-[72px] grid-cols-5 border-b-[4px] border-black bg-[#f97316] text-[12px] font-black uppercase text-white">
+            {['Roles', 'Resumes', 'Stages', 'Notes', 'Analytics'].map((item) => (
+              <span key={item} className="flex items-center justify-center border-r-[3px] border-black last:border-r-0">
+                {item}
+              </span>
+            ))}
           </nav>
 
-          <div className="absolute inset-0 bg-[linear-gradient(160deg,#010b19_0%,#07111f_45%,#111827_100%)]" />
-          <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,0.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.14)_1px,transparent_1px)] [background-size:44px_44px]" />
-
-          <div className="absolute bottom-8 left-8 z-20 w-[275px] bg-white/22 p-7 text-white backdrop-blur-sm">
-            <div className="mb-24 grid w-16 grid-cols-3 gap-2" aria-hidden="true">
-              {Array.from({ length: 9 }).map((_, index) => (
-                <span
-                  key={index}
-                  className={`h-3 w-3 rotate-45 border border-white ${index % 4 === 0 ? 'bg-white' : ''}`}
-                />
-              ))}
+          <div className="relative z-10 mx-auto mt-16 w-[74%] rotate-[-2deg] border-[4px] border-black bg-[#fffaf1] p-6 text-black shadow-[10px_10px_0_#000]">
+            <div className="mb-5 flex items-center gap-2 border-b-[3px] border-black pb-4">
+              <span className="h-3 w-3 border-2 border-black bg-[#ef4444]" />
+              <span className="h-3 w-3 border-2 border-black bg-[#facc15]" />
+              <span className="h-3 w-3 border-2 border-black bg-[#22c55e]" />
+              <span className="ml-3 flex-1 border-2 border-black bg-white px-3 py-1 text-center text-[11px] font-black text-[#555]">
+                app.landed.dev/dashboard
+              </span>
             </div>
-            <p className="font-mono text-xl font-bold uppercase">Pipeline clarity</p>
-            <p className="mt-3 text-sm leading-5 text-white/85">
+            <h2 className="text-[42px] font-black uppercase leading-none">Pipeline clarity</h2>
+            <p className="mt-4 text-[15px] font-bold leading-7 text-[#555]">
               Applications, versions, stages, and follow-ups stay visible as the search gets busy.
             </p>
+            <div className="mt-8 grid gap-3">
+              {['Resume vault synced', 'Interview loop active', 'Follow-up due Friday'].map((item) => (
+                <div className="flex items-center gap-3 border-[3px] border-black bg-white p-3" key={item}>
+                  <span className="grid h-7 w-7 place-items-center border-2 border-black bg-[#96d35f]">
+                    <Check className="h-4 w-4" />
+                  </span>
+                  <span className="text-[13px] font-black uppercase">{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="absolute bottom-8 right-8 z-20 flex">
-            <button className="flex h-12 w-12 items-center justify-center bg-white/18 text-xl text-white backdrop-blur transition hover:bg-white/28">
-              ←
-            </button>
-            <button className="ml-px flex h-12 w-12 items-center justify-center bg-white/18 text-xl text-white backdrop-blur transition hover:bg-white/28">
-              →
-            </button>
+          <div className="absolute bottom-8 left-8 z-20 border-[4px] border-black bg-[#5dd6e4] px-5 py-4 text-black shadow-[7px_7px_0_#000]">
+            <p className="text-[13px] font-black uppercase">3x more callbacks tracked</p>
+          </div>
+          <div className="absolute bottom-8 right-8 z-20 border-[4px] border-black bg-[#f9d44a] px-5 py-4 text-black shadow-[7px_7px_0_#000]">
+            <p className="text-[13px] font-black uppercase">No spreadsheet drift</p>
           </div>
         </div>
       </section>
     </main>
   );
 };
+
+const AuthButton = ({
+  label,
+  loading,
+  loadingLabel
+}: {
+  label: string;
+  loading: boolean;
+  loadingLabel: string;
+}) => (
+  <button
+    className="mt-1 inline-flex h-[52px] items-center justify-center gap-3 border-[3px] border-black bg-black px-7 py-4 text-sm font-black uppercase text-white shadow-[6px_6px_0_#f97316] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+    type="submit"
+    disabled={loading}
+  >
+    {loading ? loadingLabel : label}
+    {!loading ? <ArrowRight className="h-4 w-4" aria-hidden="true" /> : null}
+  </button>
+);

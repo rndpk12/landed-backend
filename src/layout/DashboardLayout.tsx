@@ -9,7 +9,7 @@ export const DashboardLayout = () => {
   const title = usePageTitle();
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#f7f7f6]">
+    <div className="landed-brutal brutal-grid min-h-screen overflow-hidden bg-[#fbf7ef]">
       <div className="dashboard-scale-shell min-h-screen lg:flex">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="min-w-0 flex-1 lg:pl-0">
